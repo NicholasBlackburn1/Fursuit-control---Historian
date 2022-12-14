@@ -3,20 +3,28 @@
 #include <ArduinoJson.h>
 
 
-//
+// bluetooth module config setup
 void config_bluetooth(){
 
-  
-  
 SoftwareSerial MyBlue(2, 3); // RX | TX 
-MyBlue.begin(9600); 
-Serial.println("Ready to connect\nDefualt password is 1234 or 000"); 
+MyBlue.begin(9600);
+Serial.begin(9600);
+
+Serial.println("Starting Historian....");
+
+serial.println("waiting for ble module");
+
+//
+if (MyBlue.available()){
+  Serial.println("Bluetooth Ready to connect\nDefualt password is 1234 or 000"); 
+}
+
 
 }
 
 void setup() {
+config_bluetooth();
 
-Serial.begin(9600);
 
 }
 
