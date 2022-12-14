@@ -5,7 +5,7 @@
 SoftwareSerial MyBlue;
 byte error, address;
 
-static list<byte> devices_on_network;
+
 
 // bluetooth module config setup
 void config_bluetooth(){
@@ -26,15 +26,31 @@ if (Blue.available()){
 
 }
 
+
+
+
+// Creates json to send devices connected to the app
+void deviceinfo(byte address, string hex){
+    // Creates Serialized json sting of the data
+    DynamicJsonDocument doc(1024);
+    doc["deviceid"] =(address,HEX);
+    doc["hex"] = hex;
+  
+    
+    // writes it out to the serial bus
+    MyBlue.write(serializeJson(doc, Serial));
+}
+
+
 // configs i2c buss
 void configure_i2c(){
-
+  Wire.begin();
 }
 
 
 
 // scans for devices
-void scanfori2cdevices(list<byte> devices){
+void scanfori2cdevices(){
       int nDevices;
      
       Serial.println(F("Scanning..."));
@@ -56,7 +72,8 @@ void scanfori2cdevices(list<byte> devices){
             Serial.print("0");
             Serial.print(address,HEX);
 
-     
+            deviceinfo(address)
+           
             nDevices++;
         }
         else if (error==4)
@@ -71,6 +88,7 @@ void scanfori2cdevices(list<byte> devices){
         Serial.println(F("No I2C devices found\n"));
       else
         Serial.println(F("done\n"));
+}
 }
 
 
