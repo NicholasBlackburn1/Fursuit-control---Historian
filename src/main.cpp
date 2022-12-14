@@ -1,22 +1,24 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h> 
 #include <ArduinoJson.h>
+#include <Wire.h>
 
-SoftwareSerial MyBlue;
-byte error, address;
 
+
+
+SoftwareSerial Blue(2, 3); // RX | TX 
 
 
 // bluetooth module config setup
-void config_bluetooth(){
+void config_bluetooth(SoftwareSerial Blue){
 
-SoftwareSerial MyBlue(2, 3); // RX | TX 
+
 Blue.begin(9600);
 Serial.begin(9600);
 
 Serial.println("Starting Historian....");
 
-serial.println("waiting for ble module");
+Serial.println("waiting for ble module");
 
 // chekcs the moduel
 if (Blue.available()){
@@ -30,15 +32,12 @@ if (Blue.available()){
 
 
 // Creates json to send devices connected to the app
-void deviceinfo(byte address, string hex){
+void deviceinfo(byte address, SoftwareSerial blue){
     // Creates Serialized json sting of the data
     DynamicJsonDocument doc(1024);
-    doc["deviceid"] =(address,HEX);
-    doc["hex"] = hex;
-  
-    
+    doc["deviceid"] =(address);
     // writes it out to the serial bus
-    MyBlue.write(serializeJson(doc, Serial));
+    Blue.write(serializeJson(doc, Serial));
 }
 
 
@@ -50,8 +49,11 @@ void configure_i2c(){
 
 
 // scans for devices
-void scanfori2cdevices(){
+void scanfori2cdevices(SoftwareSerial Blue){
       int nDevices;
+      byte error, address;
+
+
      
       Serial.println(F("Scanning..."));
      
@@ -72,7 +74,7 @@ void scanfori2cdevices(){
             Serial.print("0");
             Serial.print(address,HEX);
 
-            deviceinfo(address)
+            deviceinfo(address,Blue);
            
             nDevices++;
         }
@@ -95,7 +97,11 @@ void scanfori2cdevices(){
 
 
 void setup() {
-config_bluetooth();
+
+
+config_bluetooth(Blue);
+configure_i2c();
+
 
 
 
@@ -103,5 +109,11 @@ config_bluetooth();
 
 
 void loop() {
-  // put your main code here, to run repeatedly:
+
+  // scans fpr the devices on the bus
+  if(Blue.read() == 99){
+    Serial.println("scanning for devices...");
+    scanfori2cdevices(Blue);
+  }
+
 }
